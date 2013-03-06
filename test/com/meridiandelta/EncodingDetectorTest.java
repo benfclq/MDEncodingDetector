@@ -58,10 +58,27 @@ public class EncodingDetectorTest {
         Assert.assertEquals("Incorrect Encoding detected", "UTF-8", myEnc.detect());
     }
 
+    @Test
+    public void test_encodingutf16_filePassedAsPathObject_correctyDetected() throws FileNotFoundException, IOException {
+        String fileName = "UTF-16.htm";
+        Path filePath = Paths.get(getTestDocFullStringPath(fileName));
+        EncodingDetector myEnc = new EncodingDetector(filePath);
+        Assert.assertEquals("Incorrect Encoding detected", "UTF-16LE", myEnc.detect());
+    }
+
+    @Test
+    public void test_encodingISO8859_1_filePassedAsPathObject_NotDetected() throws FileNotFoundException, IOException {
+        // this file contains bearly 60 characters. It could equally be Cp1252 or MacRoman etc
+        String fileName = "ISO8859_1.htm";
+        Path filePath = Paths.get(getTestDocFullStringPath(fileName));
+        EncodingDetector myEnc = new EncodingDetector(filePath);
+        Assert.assertNull("No encoding should be detected", myEnc.detect());
+    }
+
     private String getTestDocFullStringPath(String fileName) throws IOException {
         Path p1 = Paths.get(".");
         Path p2 = p1.resolve("src\\TestDocuments\\" + fileName);
         return p2.toRealPath().toString();
-        
+
     }
 }

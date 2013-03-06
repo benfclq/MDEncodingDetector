@@ -4,8 +4,11 @@
  */
 package com.meridiandelta;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -21,6 +24,8 @@ public class EncodingDetector {
 
     String fileName = null;
     Path filePath = null;
+    String encoding = null;
+    boolean detectionAttempted = false;
 
     public EncodingDetector(String fileName) {
         this.fileName = fileName;
@@ -31,8 +36,37 @@ public class EncodingDetector {
         this.filePath = filePath;
     }
 
-    public String detect() throws FileNotFoundException {
+    public String getString() throws IOException
+    {
+        if (detectionAttempted == false)
+        {
+            this.getEncoding();
+        }
+        if (encoding != null)
+        {
+            StringBuilder buf = new StringBuilder();
+            Charset charset = Charset.forName(this.encoding);
+            BufferedReader reader = Files.newBufferedReader(this.filePath,charset);
+            char[] arr = new char[8*1024]; // 8K at a time
+            int numChars;
+            while ((numChars = reader.read(arr, 0, arr.length)) > 0) {
+                buf.append(arr, 0, numChars);
+            }
+
+            return buf.toString();
+            
+        }
+        return null;
+    }
+    
+    public String getEncoding() throws FileNotFoundException {
         byte[] buf = new byte[4096];
+
+        if (detectionAttempted == true)
+        {
+            return this.encoding;
+        }
+        
         java.io.FileInputStream fis = null;
 
         fis = new java.io.FileInputStream(this.filePath.toFile());
@@ -54,7 +88,7 @@ public class EncodingDetector {
             detector.dataEnd();
         }
         // (4)
-        String encoding = detector.getDetectedCharset();
+        this.encoding = detector.getDetectedCharset();
 //        if (encoding != null) {
 //            System.out.println("Detected encoding = " + encoding);
 //        } else {
@@ -62,8 +96,9 @@ public class EncodingDetector {
 //        }
 
         // (5)
+        detectionAttempted = true;
         detector.reset();
-        return encoding;
+        return this.encoding;
     }
 
     public static void detectOLD() {

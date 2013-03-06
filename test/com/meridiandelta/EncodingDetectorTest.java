@@ -45,7 +45,7 @@ public class EncodingDetectorTest {
     public void test_encodingutf8_filePassedAsStringName_correctyDetected() throws FileNotFoundException, IOException {
         String fileName = "UTF8.htm";
         EncodingDetector myEnc = new EncodingDetector(getTestDocFullStringPath(fileName));
-        Assert.assertEquals("Incorrect Encoding detected", "UTF-8", myEnc.detect());
+        Assert.assertEquals("Incorrect Encoding detected", "UTF-8", myEnc.getEncoding());
         // Assert.
         //fail("The test case is a prototype.");
     }
@@ -55,7 +55,7 @@ public class EncodingDetectorTest {
         String fileName = "UTF8.htm";
         Path filePath = Paths.get(getTestDocFullStringPath(fileName));
         EncodingDetector myEnc = new EncodingDetector(filePath);
-        Assert.assertEquals("Incorrect Encoding detected", "UTF-8", myEnc.detect());
+        Assert.assertEquals("Incorrect Encoding detected", "UTF-8", myEnc.getEncoding());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class EncodingDetectorTest {
         String fileName = "UTF-16.htm";
         Path filePath = Paths.get(getTestDocFullStringPath(fileName));
         EncodingDetector myEnc = new EncodingDetector(filePath);
-        Assert.assertEquals("Incorrect Encoding detected", "UTF-16LE", myEnc.detect());
+        Assert.assertEquals("Incorrect Encoding detected", "UTF-16LE", myEnc.getEncoding());
     }
 
     @Test
@@ -72,9 +72,27 @@ public class EncodingDetectorTest {
         String fileName = "ISO8859_1.htm";
         Path filePath = Paths.get(getTestDocFullStringPath(fileName));
         EncodingDetector myEnc = new EncodingDetector(filePath);
-        Assert.assertNull("No encoding should be detected", myEnc.detect());
+        Assert.assertNull("No encoding should be detected", myEnc.getEncoding());
     }
 
+    @Test
+    public void test_encodingISutf8_METASaysISO88591_filePassedAsPathObject_correctlyDetectedASUTF() throws FileNotFoundException, IOException {
+        String fileName = "UTF8WithBomMetaSays88591.htm";
+        Path filePath = Paths.get(getTestDocFullStringPath(fileName));
+        EncodingDetector myEnc = new EncodingDetector(filePath);
+        Assert.assertEquals("Incorrect Encoding detected", "UTF-8", myEnc.getEncoding());
+    }    
+    
+ 
+       @Test
+    public void test1() throws IOException  {
+        String fileName = "UTF8.htm";
+        Path filePath = Paths.get(getTestDocFullStringPath(fileName));
+        EncodingDetector myEnc = new EncodingDetector(filePath);
+        String s = myEnc.getString();
+        Assert.assertNotNull("File contents should not be null with file we know has its encoding detected correctly", s);
+    }
+    
     private String getTestDocFullStringPath(String fileName) throws IOException {
         Path p1 = Paths.get(".");
         Path p2 = p1.resolve("src\\TestDocuments\\" + fileName);
